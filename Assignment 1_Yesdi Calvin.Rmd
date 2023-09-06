@@ -1,0 +1,6 @@
+---
+title: "R Markdown Practice Yesdi"
+author: "Yesdi Calvin"
+date: "2023-09-05"
+output: html_document
+---
