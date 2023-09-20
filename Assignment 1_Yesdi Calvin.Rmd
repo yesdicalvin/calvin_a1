@@ -1,6 +1,365 @@
 ---
-title: "R Markdown Practice Yesdi"
-author: "Yesdi Calvin"
+title: "Assignment 1"
+author: "Yesdi Christian Calvin"
 date: "2023-09-05"
-output: html_document
+output:
+  word_document: default
+  html_document: default
+  pdf_document: default
 ---
+
+
+## **Git and GitHub**
+
+
+**1) Provide the link to the GitHub repo that you used to practice git from Week 1. It should have:**
+
+- Your name on the README file.
+- At least one commit with your name, with a description of what you did in that commit.
+
+=> [This is the link](https://github.com/yesdicalvin/calvin_a1.git)
+
+
+## **Reading Data**
+Download both the Angell.dta (Stata data format) dataset and the Angell.txt dataset from this website: https://stats.idre.ucla.edu/stata/examples/ara/applied-regression-analysis-by-fox-data-files/
+
+
+**2) Read in the .dta version and store in an object called angell_stata.**
+
+```{r}
+library(haven)
+angell_stata<-read_dta("E:/Umich/727/Class 2 Assignment 1/angell.dta")
+angell_stata
+```
+
+**3) Read in the .txt version and store it in an object called angell_txt.**
+
+```{r}
+angell_txt<-read.table("E:/Umich/727/Class 2 Assignment 1/angell.txt")
+angell_txt
+```
+
+**4) What are the differences between angell_stata and angell_txt? Are there differences in the classes of the individual columns?**
+
+```{r}
+#check the class of angell_stata
+class(angell_stata)
+
+```
+```{r}
+#check the class of angell_txt
+class(angell_txt)
+
+```
+Yes, there are differences between the labels or names of the individual columns. In angell_stat, each column has a specific label/name that represents the variable's name. At the same time, angell_txt does not contain a label for every column. So, when RStudio reads the file, all the labels are automatically generated with default names, which are V1, V2, V3, V4, and V5. In addition, they have different types of classes.
+
+**5) Make any updates necessary so that angell_txt is the same as angell_stata.**
+
+```{r}
+library(tibble)
+
+#change the angell_txt from data frame to tibble
+angell_txt <- as_tibble(angell_txt)
+#check the data format of angell_txt
+class(angell_txt)
+
+```
+Both have the same class now.
+
+```{r}
+## set column names using the colnames() function.
+
+colnames(angell_txt) <- c("city", "morint", "ethhet", "geomob", "region")
+
+print(angell_txt)
+
+
+```
+
+Both have the same labels for each column now.
+
+
+**6) Describe the Ethnic Heterogeneity variable. Use descriptive statistics such as mean, median, standard deviation, etc. How does it differ by region?**
+
+```{r}
+# Use summary() to provide a quick summary of several statistics
+summary(angell_txt$ethhet)
+```
+
+```{r}
+#Use var() to calculate the sample variance of a numeric vector.
+var(angell_txt$ethhet)
+
+```
+
+```{r}
+#Use sd() to calculate the standard deviation of a numeric vector.
+sd(angell_txt$ethhet)
+```
+
+```{r}
+#How does it differ by region?
+#the first thing we can do is activating the dplyr package, so we can use a syntax named group_by
+
+library(dplyr)
+
+#after dplyr activated, we can use verb "group_by" to display some descriptive statistics by different groups
+
+angell_txt%>%
+group_by(region)%>%
+summarise(mn = mean(ethhet),
+          md= median(ethhet),
+          var_ethhet = var(ethhet),
+          se_ethhet = sqrt(var_ethhet))
+
+```
+Comparison of the statistics among the groups:
+
+Compared to other regions, the Southeast has a moderately higher ethnic heterogeneity. The mean percentage of ethnic heterogeneity at the national level (31.37) is even lower than the percentage of ethnic heterogeneity in the Southeast area (52.48). Compared to other regions, the West has the lowest rate of variability. Moreover, the mean and median difference is often tiny across all regions. It denotes the absence of extreme values of each region's data's ethnic heterogeneity. The mean and median being similar can sometimes be an indication of normal distribution. However, it is not a definitive test for normality. In addition, the standard deviation is entirely consistent across all regions.
+
+
+
+## **Describing Data**
+
+R comes also with many built-in datasets. The "MASS" package, for example, comes with the "Boston" dataset.
+
+
+**7) Install the "MASS" package, load the package. Then, load the Boston dataset.**
+
+```{r}
+
+#load the "MASS" package 
+library(MASS)
+
+#load Boston dataset
+data(Boston)
+head(Boston)
+```
+
+**8) What is the type of the Boston object?**
+
+```{r}
+#determine the data type of Boston object using "typeof" function
+typeof(Boston)
+
+```
+It is shown that the data type of Boston object is list.
+
+```{r}
+#access Boston attributes associated with the object
+attributes(Boston)
+```
+
+**9) What is the class of the Boston object?**
+
+```{r}
+#determine the class of Boston object using "class" function
+class(Boston)
+```
+```{r}
+class(1:10)
+```
+It is shown that the class of Boston object is data frame containing integer values
+
+
+**10) How many of the suburbs in the Boston data set bound the Charles river?**
+
+```{r}
+
+# Count the number of units with a value of 1 (if tract bounds river) in the dummy variable
+count_units <- sum(Boston$chas == 1)
+
+# Display the count
+print(count_units)
+
+```
+The number of suburbs that bound the charles river is 35.
+
+
+**11) Do any of the suburbs of Boston appear to have particularly high crime rates? Tax rates? Pupil-teacher ratios? Comment on the range of each variable.**
+
+To show the range of each variable, we can use "summary" function to display the Maximum and Minimum value.
+```{r}
+#check the range of crime
+summary(Boston$crim)
+```
+The Mean and the 3rd Quartile show that the crime rates are below 4, meaning that overall, the suburbs in Boston have pretty low crime rates, with the lowest crime rate reaching 0.00632. However, the highest crime rate is 88.9720. It indicates that there are suburbs that have an extremely high crime rate. In brief, there must be suburbs with high crime rates, but the suburbs with low crime rates are more dominant in Boston.
+
+```{r}
+#check the range of tax
+summary(Boston$tax)
+```
+The range for tax rates is 524, calculated from a maximum value of 711 and a minimum of 187. If we compare these two values, we can conclude that there are suburbs' that are significantly higher than others regarding tax rates. On the other hand, judging from the quartiles, mean, and median, the data are dispersed over a broad interval. 
+
+```{r}
+#check the range of pupil-teacher ratio
+summary(Boston$ptratio)
+```
+The range for pupil-teacher ratio is 9.4, calculated from a maximum value of 22 and a minimum of 12.6. Comparing these two values, we can conclude that there are suburbs' that are higher than others regarding pupil-teacher rates. The gap between the mean and the max also says that. However, the range is relatively close, indicating that Boston probably has no suburbs with extremely high pupil-teacher ratios. 
+
+**12) Describe the distribution of pupil-teacher ratio among the towns in this data set that have a per capita crime rate larger than 1. How does it differ from towns that have a per capita crime rate smaller than 1?**
+```{r}
+# First of all, we have to form two different subsets based on the dummy variable
+# Subset for values > 1
+subset_large <- Boston[Boston$crim > 1, ]
+
+# Subset for values < 1
+subset_small <- Boston[Boston$crim < 1, ]
+
+```
+
+```{r}
+# Descriptive statistics for values > 1
+summary(subset_large$ptratio)
+hist(subset_large$ptratio, main="Distribution (crim > 1)", xlab="ptratio")
+```
+```{r}
+# Descriptive statistics for values < 1
+summary(subset_small$ptratio)
+hist(subset_small$ptratio, main="Distribution (crim < 1)", xlab="ptratio")
+```
+
+Based on the histogram, it can be seen that the pupil-teacher ratios in suburbs with a crime rate above 1 tend to be centered at a certain point, or in other words, many of these suburbs have similar pupil-teacher ratios. It is supported by the figures from the summary of descriptive statistics that the gap between the quartiles, mean, median and max values is very small. In other words, the values are relatively similar.
+
+On the other hand, pupil-teacher ratio data in suburbs with a crime rate below 1 tends to spread over wider intervals.
+
+## **Writing Functions**
+
+**13) Write a function that calculates 95% confidence intervals for a point estimate. The function should be called my_CI. When called with my_CI(2, 0.2), the function should print out "The 95% CI upper bound of point estimate 2 with standard error 0.2 is 2.392. The lower bound is 1.608."**
+
+Note: The function should take a point estimate and its standard error as arguments. You may use the formula for 95% CI: point estimate +/- 1.96*standard error.
+
+Hint: Pasting text in R can be done with: paste() and paste0()
+
+```{r}
+my_CI <- function(point_etimate, se){
+  
+  # Calculate the lower and upper bounds of the 95% CI
+    lower_bound <- point_etimate - 1.96 * se
+    upper_bound <- point_etimate + 1.96 * se
+  
+  # Calling the lower and upper bounds as a text using "paste" function
+    text <- paste("The 95% CI upper bound of point estimate 2 with standard error 0.2 is", upper_bound, ". The lower bound is", lower_bound, ".")
+}
+
+#CI of point estimate 2 and standard error 0.2
+CI <- my_CI(2,0.2)
+
+#print the result
+CI
+
+
+```
+
+**14) Create a new function called my_CI2 that does that same thing as the my_CI function but outputs a vector of length 2 with the lower and upper bound of the confidence interval instead of printing out the text. Use this to find the 95% confidence interval for a point estimate of 0 and standard error 0.4.**
+
+```{r}
+my_CI2 <- function(point_etimate, se){
+    
+  # Calculate the lower and upper bounds of the 95% CI
+    lower_bound <- point_etimate - 1.96 * se
+    upper_bound <- point_etimate + 1.96 * se
+  
+  # Return the lower and upper bounds as a vector
+    return(c(lower_bound, upper_bound))
+}
+
+#CI with standard error 0.4
+CI2 <- my_CI2(0,0.4)
+
+#print the result
+CI2
+```
+
+**15) Update the my_CI2 function to take any confidence level instead of only 95%. Call the new function my_CI3. You should add an argument to your function for confidence level.**
+
+Hint: Use the qnorm function to find the appropriate z-value. For example, for a 95% confidence interval, using qnorm(0.975) gives approximately 1.96.
+
+```{r}
+my_CI3 <- function(point_estimate, se, confidence_level) {
+  
+  # Calculate the z-value for the desired confidence level
+    z <- qnorm(1 - (1 - confidence_level) / 2)
+
+  # Calculate the lower and upper bounds of the CI
+    lower_bound <- point_estimate - z * se
+    upper_bound <- point_estimate + z * se
+
+  # Return the lower and upper bounds as a vector
+    return(c(lower_bound, upper_bound))
+}
+
+# Example usage with a 99% confidence level:
+CI3 <- my_CI3(0,0.4,0.99)  
+
+#print the result
+print(CI3)
+
+```
+
+**16) Without hardcoding any numbers in the code, find a 99% confidence interval for Ethnic Heterogeneity in the Angell dataset. Find the standard error by dividing the standard deviation by the square root of the sample size.**
+
+Hardcoding numbers in the code means directly specifying numerical values within the code itself, without using variables or expressions to represent those values dynamically. Therefore, in this case, I use variables or expressions to represent values, which makes my code more flexible.
+
+```{r}
+# Compute sample mean and standard deviation
+mean_val <- mean(angell_stata$ethhet)
+std_dev <- sd(angell_stata$ethhet)
+
+#Calculate the sample size (n) by counting the number of observations
+n <- length(angell_stata$ethhet)
+
+#Calculate the standard error (SE) by dividing the standard deviation by the square root of the sample size
+SE <- std_dev / sqrt(n)
+
+#Find the critical value corresponding to a 99% confidence interval. Use the qnorm() function to find the critical value (z) for a normal distribution
+alpha <- 0.01  # 1 - Confidence level
+z <- qnorm(1 - alpha/2)  # For a two-tailed test
+
+#Calculate the margin of error (MOE) by multiplying the critical value by the SE
+MOE <- z * SE
+
+#Calculate the 99% CI by adding and subtracting the MOE from the sample mean
+lower_bound <- mean_val - MOE
+upper_bound <- mean_val + MOE
+
+#print the result
+cat(lower_bound,upper_bound)
+
+```
+
+
+**17) Write a function that you can apply to the Angell dataset to get 95% confidence intervals. The function should take one argument: a vector. Use if-else statements to output NA and avoid error messages if the column in the data frame is not numeric or logical.**
+
+```{r}
+#Create a function to get 95% CI 
+angell_95_CI <- function(vector) {
+  
+  # Check if the input vector is numeric or logical using if-else statement 
+  if (is.numeric(vector)){
+
+      # Calculate the mean and standard error
+      mean_val <- mean(vector)
+      se <- sd(vector) / sqrt(length(vector))
+
+      # Calculate the critical value for a 95% confidence interval
+      z <- qnorm(0.975)
+
+      # Calculate the lower and upper bounds of the CI
+      lower_bound <- mean_val - z * se
+      upper_bound <- mean_val + z * se
+
+      # Return the confidence interval as a vector
+      return(c(lower_bound, upper_bound))
+      } 
+  else {
+  #return NA if the data is non-numeric
+  return(NA)
+  }
+}
+
+#create CI vectors of the angell_txt and return as list using the "lapply" function
+return_list <- lapply(angell_txt, angell_95_CI)
+return_list
+
+```
